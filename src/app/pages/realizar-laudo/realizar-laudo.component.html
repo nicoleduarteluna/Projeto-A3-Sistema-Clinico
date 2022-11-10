@@ -1,0 +1,20 @@
+<po-page-default [p-title]="menu">
+
+  <po-divider class="po-md-12" p-label="Dados do Paciente"></po-divider>
+
+  <po-container>
+    <span class="infoLabel"> Código do Paciente: </span>
+      <span class="infoConteudo"> {{ codigoPaciente }} </span>
+    <span class="infoLabel"> Nome: </span>
+      <span class="infoConteudo"> {{ nomePaciente }} </span>
+    <span class="infoLabel"> Data de Nascimento: </span>
+      <span class="infoConteudo"> {{ dataNascimento }} </span>
+    <span class="infoLabel"> CPF: </span>
+      <span class="infoConteudo"> {{ cpf }} </span>
+    <span class="infoLabel"> Exame: </span>
+      <span class="infoConteudo"> {{ nomeExame }} </span>
+  </po-container>
+
+  <po-code-editor class="editor"></po-code-editor>
+
+</po-page-default>
