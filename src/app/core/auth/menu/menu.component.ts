@@ -52,7 +52,5 @@ export class MenuComponent implements OnInit {
 
   printMenuAction(menu: PoMenuItem) {
     this.menuItemSelected = menu.label;
-    console.log(this);
-    console.log('Menu ativo.');
   }
 }

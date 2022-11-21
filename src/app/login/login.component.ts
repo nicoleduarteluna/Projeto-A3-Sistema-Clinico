@@ -24,6 +24,7 @@ export class LoginComponent implements OnInit {
 
   literals: PoPageLoginLiterals = {
     loginHint: 'Insira seu e-mail ou usuário',
+    registerUrl: 'Novo cadastro'
   };
 
   user: string = '';
@@ -35,7 +36,7 @@ export class LoginComponent implements OnInit {
 
   getUsers() {
     this.loginService.getUsers().subscribe((users: any) => {
-      users.forEach((user) => {
+      users.usuarios.forEach((user) => {
         this.users.push(user);
       });
     });

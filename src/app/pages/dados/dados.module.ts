@@ -1,6 +1,7 @@
 import { DadosComponent } from './dados.component';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 
 import { PoModule } from '@po-ui/ng-components';
 import { RouterModule } from '@angular/router';
@@ -13,6 +14,7 @@ import { HttpClientModule } from '@angular/common/http';
    ],
   imports: [
     BrowserModule,
+    CommonModule,
     PoModule,
     RouterModule,
     PoTemplatesModule,

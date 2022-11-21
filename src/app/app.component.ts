@@ -1,6 +1,6 @@
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from './login/auth.service';
-import { Component, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ViewChild } from '@angular/core';
 import { AuthGuard } from './core/auth/auth.guard';
 import { PoMenuItem, PoModalAction, PoModalComponent } from '@po-ui/ng-components';
 
@@ -9,7 +9,7 @@ import { PoMenuItem, PoModalAction, PoModalComponent } from '@po-ui/ng-component
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements AfterViewChecked {
 
   mostraMenu: boolean = false;
   menuItemSelected: string;
@@ -38,13 +38,6 @@ export class AppComponent {
       link: '/dados'
     },
     {
-      label: 'Contato',
-      action: this.updateMenu.bind(this),
-      icon: 'po-icon po-icon-telephone',
-      shortLabel: 'Contato',
-      link: '/contato'
-    },
-    {
       label: 'Sair',
       action: this.openModalExit.bind(this),
       icon: 'po-icon po-icon-exit',
@@ -66,7 +59,8 @@ export class AppComponent {
 
   constructor( private authService: AuthService,
     private authGuard: AuthGuard,
-    private router: Router ) { }
+    private router: Router,
+    private activatedRoute: ActivatedRoute ) { }
 
   ngOnInit(){
     this.authGuard.mostraMenuEmit.subscribe(mostra => {
@@ -74,7 +68,6 @@ export class AppComponent {
     });
 
     this.authService.usuarioLogadoEmitter.subscribe(usuario => {
-      console.log('this.usuarisdsdsdso', usuario)
       this.usuarioLogado = usuario;
       if(this.usuarioLogado.type == 'medico') {
         this.menus = [
@@ -84,6 +77,20 @@ export class AppComponent {
             icon: 'po-icon po-icon-home',
             shortLabel: 'Home',
             link: '/home'
+          },
+          {
+            label: 'Cadastrar Exames',
+            action: this.updateMenu.bind(this),
+            icon: 'po-icon po-icon-user-add',
+            shortLabel: 'Cad. Exames',
+            link: '/cadastrar-exames'
+          },
+          {
+            label: 'Meus Dados',
+            action: this.updateMenu.bind(this),
+            icon: 'po-icon po-icon-archive',
+            shortLabel: 'Dados',
+            link: '/dados-profissional'
           },
           {
             label: 'Sair',
@@ -98,11 +105,18 @@ export class AppComponent {
 
   }
 
+  ngAfterViewChecked(): void {
+    const rotaAtiva = this.activatedRoute.snapshot.children[0].routeConfig.path;
+    if (rotaAtiva == 'login' ) {
+      this.mostraMenu = false;
+    } else if (rotaAtiva == 'novo-cadastro'){
+      this.mostraMenu = true;
+    }
+  }
+
   updateMenu(menu: PoMenuItem) {
     this.menuItemSelected = menu.label;
-    console.log(this);
-    console.log('Menu ativo.');
-    this.router.navigate([menu.link], { state: { menu: this.menuItemSelected } })
+    this.router.navigate([menu.link], { state: { menu: this.menuItemSelected, usuario: this.usuarioLogado } })
   }
 
   openModalExit() {

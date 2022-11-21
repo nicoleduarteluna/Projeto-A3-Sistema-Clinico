@@ -36,4 +36,6 @@
     <hr>
     <po-button class="btnLaudar" p-label="Laudar" p-kind="primary" (p-click)="realizarLaudo()"></po-button>
   </div>
+  <div *ngIf="this.usuarioLogado.type == 'paciente'">
+  </div>
 </po-page-default>

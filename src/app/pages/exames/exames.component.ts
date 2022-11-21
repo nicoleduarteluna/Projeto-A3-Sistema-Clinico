@@ -1,52 +1,73 @@
 import { ExamesService } from './exames.service';
 import { Router } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
-import { PoTableAction, PoTableColumn } from '@po-ui/ng-components';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import {
+  PoModalAction,
+  PoModalComponent,
+  PoTableAction,
+  PoTableColumn,
+} from '@po-ui/ng-components';
+import { NotificationService } from 'src/app/util/notification.service';
 
 @Component({
   selector: 'app-exames',
   templateUrl: './exames.component.html',
-  styleUrls: ['./exames.component.css']
+  styleUrls: ['./exames.component.css'],
 })
 export class ExamesComponent implements OnInit {
-
   menuItemSelected: string = '';
 
   columnsExame: PoTableColumn[] = [
     { label: 'Exame', property: 'nomeExame' },
     { label: 'Realizado em', property: 'dataExecucao' },
+    { label: 'Status', property: 'statusLaudo' },
   ];
 
   exames: any[] = [];
-  // exames: any[] = [
-  //  { nomeExame: 'US APARELHO URINÁRIO', dataExecucao: '28/09/2022' },
-  //  { nomeExame: 'MAMOGRAFIA', dataExecucao: '28/09/2022' },
-  //  { nomeExame: 'MEMBROS INFERIORES', dataExecucao: '05/04/2022' }
-  // ];
+
+  laudo = '';
+  titleModal = '';
+
+  @ViewChild('modalLaudo') modalLaudo: PoModalComponent;
+
+  primaryAction: PoModalAction = {
+    action: () => {
+      this.modalLaudo.close();
+    },
+    label: 'Voltar',
+  };
 
   actions: PoTableAction[] = [
     {
-      label: 'Abrir'
+      label: 'Abrir Laudo',
+      action: this.abrirModalLaudo.bind(this),
     },
-
   ];
 
-  constructor(private router: Router, private exameService: ExamesService) {
-     const nav = this.router.getCurrentNavigation().extras.state;
-     this.menuItemSelected = nav.menu;
-
-   }
+  constructor(private router: Router, private exameService: ExamesService, private notificationService: NotificationService) {
+    const nav = this.router.getCurrentNavigation().extras.state;
+    this.menuItemSelected = nav.menu;
+  }
 
   ngOnInit() {
-   this.preencherExames();
+    this.preencherExames();
   }
 
   preencherExames() {
     this.exameService.getExame().subscribe((beneficiarioLogado: any) => {
-      beneficiarioLogado.exames.forEach((exame) => {
+      beneficiarioLogado.beneficiarios.exames.forEach((exame) => {
         this.exames.push(exame);
       });
     });
   }
 
+  abrirModalLaudo(exame) {
+    if(exame.statusLaudo == 'A Laudar') {
+      this.notificationService.warning('Não é possível visualizar o laudo deste exame!');
+    } else {
+      this.laudo = exame.laudo;
+      this.titleModal = exame.nomeExame;
+      this.modalLaudo.open();
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   PoMenuItem,
@@ -6,6 +6,9 @@ import {
   PoTableAction,
   PoTableColumn,
 } from '@po-ui/ng-components';
+import { NotificationService } from 'src/app/util/notification.service';
+import { DadosService } from '../dados/dados.service';
+import { ExamesService } from '../exames/exames.service';
 import { HomeService } from './home.service';
 
 @Component({
@@ -14,14 +17,13 @@ import { HomeService } from './home.service';
   providers: [],
   styleUrls: ['./home.component.css'],
 })
-export class HomeComponent {
+export class HomeComponent implements OnDestroy {
   menuItemSelected: string = 'Home';
   usuarioLogado: any;
   labelConteudo: string = 'Conteúdo';
   filtro: string = 'nome';
 
   filtroOptions: Array<PoSelectOption> = [
-    { label: 'Código do Paciente', value: 'id' },
     { label: 'Nome do Paciente', value: 'nome' },
     { label: 'Data de Nascimento', value: 'dataNascimento' },
     { label: 'CPF do Paciente', value: 'cpf' },
@@ -35,7 +37,6 @@ export class HomeComponent {
     { label: 'Status', property: 'statusLaudo' },
     { label: 'Exame', property: 'nomeExame', width: '18%' },
     { label: 'Dt. Exame', property: 'dataExecucao' },
-    { label: 'Cód. Paciente', property: 'id' },
     { label: 'Nome', property: 'nome', width: '15%' },
     { label: 'Dt. Nascimento', property: 'dataNascimento' },
     { label: 'CPF Paciente', property: 'cpf' },
@@ -44,21 +45,35 @@ export class HomeComponent {
   exames: any[] = [];
   beneficiarios: any[] = [];
 
-  // actions: PoTableAction[] = [
-  //   {
-  //     label: 'Abrir'
-  //   },
-  // ];
-
   rowSelected: any;
 
-  constructor(private router: Router, private homeService: HomeService) {
+  user: string = '';
+
+  constructor(
+    private router: Router,
+    private homeService: HomeService,
+    private dadosService: DadosService,
+    private exameService: ExamesService,
+    private notificationService: NotificationService
+  ) {
     const nav = this.router.getCurrentNavigation().extras.state;
-    this.usuarioLogado = nav.usuarioLogado;
+    if (nav) {
+      this.usuarioLogado = nav.usuarioLogado;
+      this.dadosService.setId(this.usuarioLogado.rg);
+      this.exameService.setId(this.usuarioLogado.rg);
+    } else {
+      this.user = '';
+      this.user = sessionStorage.getItem('User').toLocaleLowerCase();
+      this.getUsers();
+    }
   }
 
   ngOnInit(): void {
     this.getExames(false);
+  }
+
+  ngOnDestroy(): void {
+    this.exames = [];
   }
 
   printMenuAction(menu: PoMenuItem) {
@@ -67,20 +82,21 @@ export class HomeComponent {
 
   getExames(filtrar) {
     this.homeService.getExames().subscribe((dados: any) => {
-      dados.forEach((beneficiario) => {
+      dados.beneficiarios.forEach((beneficiario) => {
         beneficiario.exames.forEach((exame) => {
           exame = {
             ...exame,
             nome: beneficiario.nome,
             dataNascimento: beneficiario.dataNascimento,
             cpf: beneficiario.cpf,
+            rg: beneficiario.rg,
+            telefone: beneficiario.telefone,
+            email: beneficiario.email,
             id: beneficiario.id,
           };
           if (!filtrar) {
             this.exames.push(exame);
           } else {
-            console.log('teste', exame[`${this.filtro}`]);
-            console.log('exameeeee', exame);
             if (exame[`${this.filtro}`] == this.conteudoFiltro) {
               this.exames.push(exame);
             }
@@ -91,31 +107,51 @@ export class HomeComponent {
   }
 
   changeFilter(filtro) {
-    console.log('filtro', filtro);
     this.filtro = filtro;
   }
 
   filtrarItens(conteudo) {
     this.exames = [];
-    console.log('conteudo:', conteudo);
     this.getExames(true);
   }
 
   teste(row) {
-    console.log('row', row);
     this.rowSelected = {
       id: row.id,
       nome: row.nome,
       dataNascimento: row.dataNascimento,
       cpf: row.cpf,
+      rg: row.rg,
+      telefone: row.telefone,
+      email: row.email,
       nomeExame: row.nomeExame,
       dataExecucao: row.dataExecucao,
       statusLaudo: row.statusLaudo,
+      laudo: row.laudo,
     };
-    console.log('this.rowSelected', this.rowSelected);
   }
 
   realizarLaudo() {
-    this.router.navigate(['/realizar-laudo'], { state: { exame: this.rowSelected }});
+    if(this.rowSelected.statusLaudo == 'Laudado') {
+      this.notificationService.warning(`Exame ${this.rowSelected.nomeExame} já foi laudado!`);
+    } else {
+      this.router.navigate(['/realizar-laudo'], {
+        state: { exame: this.rowSelected },
+      });
+    }
+  }
+
+  getUsers() {
+    this.homeService.getUsers(this.user).subscribe((users: any) => {
+      this.usuarioLogado = users.usuarios;
+    });
+  }
+
+  redirectToDados() {
+    this.router.navigate(['/dados']);
+  }
+
+  redirectToExames() {
+    this.router.navigate(['/exames']);
   }
 }

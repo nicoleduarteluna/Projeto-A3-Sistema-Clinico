@@ -5,7 +5,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { PoModule } from '@po-ui/ng-components';
 import { RouterModule } from '@angular/router';
 import { PoTemplatesModule } from '@po-ui/ng-templates';
-import { HomeRoutingModule } from './home-routing.module';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -17,7 +16,6 @@ import { HttpClientModule } from '@angular/common/http';
     PoModule,
     RouterModule,
     PoTemplatesModule,
-    HomeRoutingModule,
     FormsModule,
     HttpClientModule
   ],

@@ -7,12 +7,18 @@ import { map } from 'rxjs';
 })
 export class ExamesService {
 
-  url = 'http://localhost:3000/beneficiarios/1'
+  id: string = '';
+
+  setId(id) {
+    this.id = id;
+  }
+
+  url = 'http://localhost:5000/api/beneficiarios';
 
   constructor(private http: HttpClient) { }
 
   getExame() {
-    return this.http.get(this.url);
+    return this.http.get(`${this.url}/${this.id}`);
   }
 
 }
